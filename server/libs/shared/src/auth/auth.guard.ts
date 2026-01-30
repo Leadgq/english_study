@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
     const token = headers.authorization.split(' ')[1];
     try {
       const payload = this.jwtService.verify<RefreshToken>(token);
-      if (payload.tokenType !== 'refresh') {
+      if (payload.tokenType !== 'access') {
         throw new UnauthorizedException('token类型错误');
       }
       request.user = payload;

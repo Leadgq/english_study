@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { ResultUserWithToken } from "@en/common/user";
+import type { ResultUserWithToken, Token } from "@en/common/user";
 import { computed, ref } from "vue";
 
 export const userStore = defineStore(
@@ -11,13 +11,33 @@ export const userStore = defineStore(
       user.value = userData;
     };
 
+    const getAccessToken = computed(() => user.value?.token.accessToken || "");
+
+    const getRefreshToken = computed(
+      () => user.value?.token.refreshToken || "",
+    );
+
+    const updateToken = (newToken: Token) => {
+      if (user.value) {
+        user.value.token = newToken;
+      }
+    };
+
     const getUser = () => computed(() => user.value);
 
     const loginOut = () => {
       user.value = null;
     };
 
-    return { user, setUser, getUser, loginOut };
+    return {
+      user,
+      setUser,
+      getAccessToken,
+      getRefreshToken,
+      getUser,
+      updateToken,
+      loginOut,
+    };
   },
   {
     persist: true,

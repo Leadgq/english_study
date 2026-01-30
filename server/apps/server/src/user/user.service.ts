@@ -114,9 +114,9 @@ export class UserService {
         email: user.email,
         name: user.name,
       });
-      this.responseService.success(newToken)
+      return this.responseService.success(newToken);
     } catch {
-      this.responseService.error(null, 'token过期');
+      return this.responseService.error(null, 'token过期');
     }
   }
 }
