@@ -9,7 +9,10 @@ export const serverApi = axios.create({
   baseURL: "/api/v1",
   timeout: TIMEOUT,
 });
-
+// 创建锁
+let isRefreshing = false;
+// 创建失败的队列
+let requestQueue: ((newAccessToken: string) => void)[] = [];
 // 请求拦截
 serverApi.interceptors.request.use((config) => {
   const user = userStore();
@@ -33,14 +36,23 @@ serverApi.interceptors.response.use(
       const refreshToken = user.getRefreshToken;
       const originalRequest = error.config;
       if (!accessToken || !refreshToken) {
-        ElMessage.error("没有任何token,无法刷新");
+        ElMessage.error("没有任何token,无法刷新，请重新登录  ");
         user.loginOut();
         router.replace("/");
         return Promise.reject(error);
       }
+      if (isRefreshing) {
+        return new Promise((resolve) => {
+          // 加入队列
+          requestQueue.push((newAccessToken: string) => {
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            resolve(serverApi(originalRequest));
+          });
+        });
+      }
+      isRefreshing = true;
       // 准备刷新token
       const newToken = await refreshTokenApi({ refreshToken });
-      console.log(newToken);
       if (newToken.success) {
         user.updateToken(newToken.data);
       } else {
@@ -48,6 +60,11 @@ serverApi.interceptors.response.use(
         router.replace("/");
         return Promise.reject(error);
       }
+      // 刷新token成功后，执行队列中的请求
+      requestQueue.forEach((callback) => callback(newToken.data.accessToken));
+      // 清空队列
+      requestQueue = [];
+      isRefreshing = false;
       return serverApi(originalRequest);
     }
   },

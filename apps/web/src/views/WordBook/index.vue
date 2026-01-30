@@ -86,6 +86,10 @@ const query = ref<WordQuery>({
 function searchWord() {
   query.value.page = 1;
   getList();
+  getList();
+  getList();
+  getList();
+  getList();
 }
 
 const getList = async () => {
