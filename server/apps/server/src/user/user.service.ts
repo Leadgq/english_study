@@ -1,25 +1,23 @@
+import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
-import type { UserLogin, UserRegister } from '@en/common/user';
+import type {
+  UserLogin,
+  UserRegister,
+  Token,
+  RefreshToken,
+} from '@en/common/user';
 import { ResponseService, PrismaService } from '@libs/shared';
 import { UserCreateInput } from '@libs/shared/generated/prisma/models';
-const userSelect = {
-  id: true,
-  phone: true,
-  name: true,
-  email: true,
-  address: true,
-  avatar: true,
-  createdAt: true,
-  updatedAt: true,
-  lastLoginAt: true,
-  wordNumber: true,
-  dayNumber: true,
-};
+import { AuthService } from '../auth/auth.service';
+import { userSelect } from './user.select';
+
 @Injectable()
 export class UserService {
   constructor(
     private readonly responseService: ResponseService,
     private readonly prismaService: PrismaService,
+    private readonly authService: AuthService,
+    private readonly jwtService: JwtService,
   ) {}
 
   async login(loginUserDto: UserLogin) {
@@ -43,7 +41,15 @@ export class UserService {
       },
       select: userSelect,
     });
-    return this.responseService.success(loginUser);
+    const token = this.authService.generateToken({
+      userId: loginUser.id,
+      email: loginUser.email,
+      name: loginUser.name,
+    });
+    return this.responseService.success({
+      ...loginUser,
+      token,
+    });
   }
 
   async register(registerUserDto: UserRegister) {
@@ -78,6 +84,39 @@ export class UserService {
       data,
       select: userSelect,
     });
-    return this.responseService.success(registerUser);
+    const token = this.authService.generateToken({
+      userId: registerUser.id,
+      email: registerUser.email,
+      name: registerUser.name,
+    });
+    return this.responseService.success({
+      ...registerUser,
+      token,
+    });
+  }
+
+  async refreshToken(token: Omit<Token, 'accessToken'>) {
+    try {
+      const decoded = this.jwtService.verify<RefreshToken>(token.refreshToken);
+      if (decoded.tokenType !== 'refresh') {
+        return this.responseService.error(null, 'token类型错误');
+      }
+      const user = await this.prismaService.user.findUnique({
+        where: {
+          id: decoded.userId,
+        },
+      });
+      if (!user) {
+        return this.responseService.error(null, '用户不存在');
+      }
+      const newToken = this.authService.generateToken({
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+      });
+      this.responseService.success(newToken)
+    } catch {
+      this.responseService.error(null, 'token过期');
+    }
   }
 }

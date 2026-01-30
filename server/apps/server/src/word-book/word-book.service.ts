@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import type { WordQuery } from '@en/common/word';
 import { WordBookWhereInput } from '@libs/shared/generated/prisma/models';
 import { ResponseService, PrismaService } from '@libs/shared';

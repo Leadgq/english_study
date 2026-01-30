@@ -32,3 +32,13 @@ export type Token = {
 export type ResultUserWithToken = ResultUser & {
   token: Token;
 };
+
+// token 负载类型
+export type TokenPayload = Pick<User, "email" | "name"> & {
+  userId: User["id"];
+};
+
+// 刷新token
+export type RefreshToken = TokenPayload & {
+  tokenType: "refresh" | "access";
+};
