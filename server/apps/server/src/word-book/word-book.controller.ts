@@ -9,7 +9,7 @@ export class WordBookController {
 
   @UseGuards(AuthGuard)
   @Get()
-  findAll(@Query() query: WordQuery) {
+  findAll(@Query() query) {
     return this.wordBookService.findAll(query);
   }
 }

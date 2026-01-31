@@ -51,21 +51,23 @@ serverApi.interceptors.response.use(
         });
       }
       isRefreshing = true;
-      // 准备刷新token
-      const newToken = await refreshTokenApi({ refreshToken });
-      if (newToken.success) {
-        user.updateToken(newToken.data);
-      } else {
-        user.loginOut();
-        router.replace("/");
+      try {
+        const newToken = await refreshTokenApi({ refreshToken });
+        if (newToken.success) {
+          user.updateToken(newToken.data);
+        } else {
+          user.loginOut();
+          router.replace("/");
+          return Promise.reject(error);
+        }
+        requestQueue.forEach((callback) => callback(newToken.data.accessToken));
+        return serverApi(originalRequest);
+      } catch (error) {
         return Promise.reject(error);
+      } finally {
+        requestQueue = [];
+        isRefreshing = false;
       }
-      // 刷新token成功后，执行队列中的请求
-      requestQueue.forEach((callback) => callback(newToken.data.accessToken));
-      // 清空队列
-      requestQueue = [];
-      isRefreshing = false;
-      return serverApi(originalRequest);
     }
   },
 );
