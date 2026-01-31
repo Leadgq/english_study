@@ -2,7 +2,6 @@ import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
 import type {
   UserLogin,
-  UserRegister,
   Token,
   RefreshToken,
 } from '@en/common/user';
@@ -10,6 +9,7 @@ import { ResponseService, PrismaService } from '@libs/shared';
 import { UserCreateInput } from '@libs/shared/generated/prisma/models';
 import { AuthService } from '../auth/auth.service';
 import { userSelect } from './user.select';
+import {UserRegisterDto} from './dto/create-user.dto'
 
 @Injectable()
 export class UserService {
@@ -52,7 +52,7 @@ export class UserService {
     });
   }
 
-  async register(registerUserDto: UserRegister) {
+  async register(registerUserDto: UserRegisterDto) {
     const data: UserCreateInput = {
       phone: registerUserDto.phone,
       name: registerUserDto.name,
