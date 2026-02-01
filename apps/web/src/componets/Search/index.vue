@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang='ts'>
-import type { Word } from '@en/common';
+import type { Word } from '@en/common/word';
 import { customRef, ref } from 'vue'
 const isShow = ref(false)
 import { getWordBookList } from '@/apis/word-book';
@@ -52,6 +52,9 @@ const search = customRef((track, trigger) => {
 })
 
 const getList = async () => {
+    if(!isShow.value){
+        return
+    }
     const res = await getWordBookList({
         word: search.value,
         page: 1,
