@@ -28,7 +28,13 @@ serverApi.interceptors.response.use(
     return config.data;
   },
   async (error) => {
+    //  离线异常
+    if (error.code === "ERROR_NETWORK") {
+      ElMessage.error("网络异常，请检查网络设置");
+      return Promise.reject(error);
+    }
     if (error.response.status !== 401) {
+      ElMessage.error('服务异常');
       return Promise.reject(error);
     } else {
       const user = userStore();
