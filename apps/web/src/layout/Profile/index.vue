@@ -66,20 +66,22 @@ import avatar from '@/assets/images/avatar/default-avatar.png'
 import { userStore } from '@/stores/user';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useLogin } from "@/hooks/useLogin"
 const router = useRouter()
 
 const userInstance = userStore();
+const { login } = useLogin()
+
 const isLoggedIn = computed(() => userInstance.user);
 const displayName = computed(() => userInstance.user?.name ?? '游客');
 const bio = computed(() => userInstance.user?.bio ?? '');
 
 
 function loginHandle() {
-
+    login()
 }
-
 function logoutHandle() {
-    
+    userInstance.loginOut()
 }
 
 function gotoPath(path: string) {
