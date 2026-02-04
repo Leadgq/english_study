@@ -29,7 +29,7 @@ export type UserUpdate = Pick<
 >;
 
 // 头像返回类型
-export type Avatar = {
+export type AvatarResult = {
   previewUrl: string; //预览地址
   databaseUrl: string; //数据库地址
 };
