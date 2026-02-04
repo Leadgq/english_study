@@ -11,7 +11,13 @@ export interface User {
   createdAt: Date; // 创建时间
   updatedAt: Date; // 更新时间
   lastLoginAt?: Date | null; // 最后登录时间
+  bio?: string | null; // 签名  
+  isTimingTask: boolean; // 是否开启定时任务 
+  timingTaskTime: string; //定时任务时间默认晚上0点开始，每隔24小时执行 
 }
+
+// 用户更新类型
+export type UserUpdate = Pick<User, "name" | "email" | "address" | "avatar" | "bio" | "isTimingTask" | "timingTaskTime">;
 
 // 登录类型
 export type UserLogin = Pick<User, "phone" | "password">;
