@@ -150,7 +150,12 @@ export class UserService {
   }
 
   async updateUser(updateUserDto: UserUpdate, user: Request['user']) {
-    if (updateUserDto.email) {
+    const userData = await this.prismaService.user.findUnique({
+      where: {
+        id: user.userId,
+      },
+    });
+    if (updateUserDto.email && updateUserDto.email !== userData!.email) {
       const email = await this.prismaService.user.findUnique({
         where: {
           email: updateUserDto.email,
