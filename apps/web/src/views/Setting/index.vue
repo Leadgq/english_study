@@ -7,7 +7,7 @@
             </div>
 
             <div class="flex gap-2">
-                <el-button>重置</el-button>
+                <el-button @click="init">重置</el-button>
                 <el-button @click="onSave" type="primary">保存</el-button>
             </div>
         </div>
@@ -201,8 +201,10 @@ async function onAvatarSelect(file: UploadFile) {
 }
 
 function init() {
-    form.value = userInstance.getUpdateUserInfo();
-    previewUrl.value = uploadUrl + form.value.avatar;
+    if (userInstance.getUser()) {
+        form.value = userInstance.getUpdateUserInfo();
+        previewUrl.value = uploadUrl + form.value.avatar;
+    }
 }
 
 onMounted(() => {
