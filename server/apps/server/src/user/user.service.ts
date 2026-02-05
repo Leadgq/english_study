@@ -1,15 +1,13 @@
 import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
-import type {
-  UserLogin,
-  Token,
-  RefreshToken,
-} from '@en/common/user';
+import type { UserLogin, Token, RefreshToken } from '@en/common/user';
 import { ResponseService, PrismaService } from '@libs/shared';
 import { UserCreateInput } from '@libs/shared/generated/prisma/models';
 import { AuthService } from '../auth/auth.service';
 import { userSelect } from './user.select';
-import {UserRegisterDto} from './dto/create-user.dto'
+import { UserRegisterDto } from './dto/create-user.dto';
+import { ConfigService } from '@nestjs/config';
+import { MinioService } from '@libs/shared/minio/minio.service';
 
 @Injectable()
 export class UserService {
@@ -18,6 +16,8 @@ export class UserService {
     private readonly prismaService: PrismaService,
     private readonly authService: AuthService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+    private readonly minioService: MinioService,
   ) {}
 
   async login(loginUserDto: UserLogin) {
@@ -118,5 +118,29 @@ export class UserService {
     } catch {
       return this.responseService.error(null, 'token过期');
     }
+  }
+
+  async uploadAvatar(file: Express.Multer.File) {
+    if (!file) {
+      return this.responseService.error(null, '文件不存在');
+    }
+    if (file.size > 1024 * 1024 * 5) {
+      return this.responseService.error(null, '文件大小不能超过5MB');
+    }
+    const minioClint = this.minioService.getClient();
+    const bucket = this.minioService.getBucket();
+    const fileName = `${Date.now()}-${file.originalname}`;
+    await minioClint.putObject(bucket, fileName, file.buffer, file.size, {
+      'Content-Type': file.mimetype,
+    });
+    const isHttps = !!Number(this.configService.get('MINIO_USE_SSL'));
+    const baseUrl = isHttps ? 'https' : 'http';
+    const port = this.configService.get('MINIO_PORT')!;
+    const databaseUrl = `/${bucket}/${fileName}`;
+    const previewUrl = `${baseUrl}://${this.configService.get('MINIO_HOST')}:${port}${databaseUrl}`;
+    return this.responseService.success({
+      previewUrl,
+      databaseUrl,
+    });
   }
 }
