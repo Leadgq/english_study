@@ -9,6 +9,10 @@ export const serverApi = axios.create({
   baseURL: "/api/v1",
   timeout: TIMEOUT,
 });
+
+export const uploadUrl =  import.meta.env.DEV ? 'http://192.168.101.32:9000' : 'http://目前没有'
+
+
 // 创建锁
 let isRefreshing = false;
 // 创建失败的队列

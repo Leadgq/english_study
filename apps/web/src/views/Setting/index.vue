@@ -20,8 +20,8 @@
                     </template>
 
                     <div class="flex items-center gap-4">
-                        <img class="w-20 h-20 rounded-full object-cover border-2 border-gray-200" :src="previewUrl || avatar"
-                            loading="lazy" referrerpolicy="no-referrer" />
+                        <img class="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                            :src="previewUrl || avatar" loading="lazy" referrerpolicy="no-referrer" />
 
                         <div class="flex flex-col gap-2">
                             <el-upload :show-file-list="false" :auto-upload="false" accept="image/*"
@@ -118,13 +118,12 @@ import type { FormRules, FormInstance, UploadFile } from 'element-plus'
 import { useLogin } from "@/hooks/useLogin"
 import { ElMessageBox, ElMessage } from "element-plus"
 import { updateUser, uploadAvatar } from '@/apis/user';
+import { uploadUrl } from '@/apis';
 const userInstance = userStore();
 const formInstanceRef = useTemplateRef<FormInstance>("formInstanceRef")
 const { loginOut } = useLogin()
 
-
 const previewUrl = ref('');
-
 const form = ref<UserUpdate>({
     name: '',
     email: '',
@@ -167,11 +166,12 @@ const rules: FormRules = {
 }
 
 function onSave() {
-    formInstanceRef.value?.validate(async(valid: boolean) => {
+    formInstanceRef.value?.validate(async (valid: boolean) => {
         if (!valid) return;
         const res = await updateUser(form.value);
         if (res.success && res.data) {
             ElMessage.success('更新成功');
+            userInstance.updateUserInfo(res.data);
         } else {
             ElMessage.error(res.message || '更新失败');
         }
@@ -200,9 +200,13 @@ async function onAvatarSelect(file: UploadFile) {
     }
 }
 
-
+function init() {
+    form.value = userInstance.getUpdateUserInfo();
+    previewUrl.value = uploadUrl + form.value.avatar;
+}
 
 onMounted(() => {
-    form.value = userInstance.getUpdateUserInfo();
+    init();
 })
+
 </script>

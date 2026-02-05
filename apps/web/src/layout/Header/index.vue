@@ -54,11 +54,13 @@
 <script setup lang="ts">
 import { Sunny, Star, HomeFilled, Notebook, MagicStick, Reading, Setting } from '@element-plus/icons-vue'
 import { userStore } from '@/stores/user';
-import avatar from '@/assets/images/avatar/default-avatar.png'
+import { useAvatar } from "@/hooks/useAvatar"
+
 import Profile from '@/layout/Profile/index.vue'
 import { ElPopover } from 'element-plus'
 import { useRouter } from 'vue-router';
 const router = useRouter()
+const { avatar } = useAvatar();
 
 const userInstance = userStore();
 </script>

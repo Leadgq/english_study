@@ -61,15 +61,14 @@
 </template>
 
 <script setup lang="ts">
-
-import avatar from '@/assets/images/avatar/default-avatar.png'
 import { userStore } from '@/stores/user';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useLogin } from "@/hooks/useLogin"
+import { useAvatar } from "@/hooks/useAvatar"
 import { ElMessageBox } from "element-plus"
 const router = useRouter()
-
+const {avatar} = useAvatar();
 const userInstance = userStore();
 const { login, loginOut } = useLogin()
 
