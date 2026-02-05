@@ -115,8 +115,11 @@ import { onMounted, ref, useTemplateRef } from 'vue';
 import avatar from "@/assets/images/avatar/default-avatar.png"
 import { userStore } from "@/stores/user";
 import type { FormRules, FormInstance } from 'element-plus'
+import { useLogin } from "@/hooks/useLogin"
+import { ElMessageBox } from "element-plus"
 const userInstance = userStore();
 const formInstanceRef = useTemplateRef<FormInstance>("formInstanceRef")
+const { loginOut } = useLogin()
 
 
 const form = ref<UserUpdate>({
@@ -167,7 +170,13 @@ function onSave() {
 }
 
 function logoutHandle() {
-
+    ElMessageBox.confirm('确定退出登录吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+    }).then(() => {
+        loginOut()
+    })
 }
 
 function onAvatarSelect() {

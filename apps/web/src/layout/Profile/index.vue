@@ -67,10 +67,11 @@ import { userStore } from '@/stores/user';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useLogin } from "@/hooks/useLogin"
+import { ElMessageBox } from "element-plus"
 const router = useRouter()
 
 const userInstance = userStore();
-const { login } = useLogin()
+const { login, loginOut } = useLogin()
 
 const isLoggedIn = computed(() => userInstance.user);
 const displayName = computed(() => userInstance.user?.name ?? '游客');
@@ -80,8 +81,15 @@ const bio = computed(() => userInstance.user?.bio ?? '');
 function loginHandle() {
     login()
 }
+
 function logoutHandle() {
-    userInstance.loginOut()
+    ElMessageBox.confirm('确定退出登录吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+    }).then(() => {
+        loginOut()
+    })
 }
 
 function gotoPath(path: string) {
