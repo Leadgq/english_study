@@ -20,7 +20,7 @@
                     </template>
 
                     <div class="flex items-center gap-4">
-                        <img class="w-20 h-20 rounded-full object-cover border-2 border-gray-200" :src="avatar"
+                        <img class="w-20 h-20 rounded-full object-cover border-2 border-gray-200" :src="previewUrl || avatar"
                             loading="lazy" referrerpolicy="no-referrer" />
 
                         <div class="flex flex-col gap-2">
@@ -114,13 +114,16 @@ import type { UserUpdate } from '@en/common/user';
 import { onMounted, ref, useTemplateRef } from 'vue';
 import avatar from "@/assets/images/avatar/default-avatar.png"
 import { userStore } from "@/stores/user";
-import type { FormRules, FormInstance } from 'element-plus'
+import type { FormRules, FormInstance, UploadFile } from 'element-plus'
 import { useLogin } from "@/hooks/useLogin"
-import { ElMessageBox } from "element-plus"
+import { ElMessageBox, ElMessage } from "element-plus"
+import { updateUser, uploadAvatar } from '@/apis/user';
 const userInstance = userStore();
 const formInstanceRef = useTemplateRef<FormInstance>("formInstanceRef")
 const { loginOut } = useLogin()
 
+
+const previewUrl = ref('');
 
 const form = ref<UserUpdate>({
     name: '',
@@ -164,8 +167,14 @@ const rules: FormRules = {
 }
 
 function onSave() {
-    formInstanceRef.value?.validate((valid: boolean) => {
+    formInstanceRef.value?.validate(async(valid: boolean) => {
         if (!valid) return;
+        const res = await updateUser(form.value);
+        if (res.success && res.data) {
+            ElMessage.success('更新成功');
+        } else {
+            ElMessage.error(res.message || '更新失败');
+        }
     });
 }
 
@@ -179,8 +188,16 @@ function logoutHandle() {
     })
 }
 
-function onAvatarSelect() {
-
+async function onAvatarSelect(file: UploadFile) {
+    const formData = new FormData();
+    formData.append('file', file.raw as File);
+    const res = await uploadAvatar(formData);
+    if (res.success && res.data) {
+        form.value.avatar = res.data.databaseUrl;
+        previewUrl.value = res.data.previewUrl;
+    } else {
+        ElMessage.error(res.message || '上传失败');
+    }
 }
 
 

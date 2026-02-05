@@ -1,14 +1,19 @@
 import { JwtService } from '@nestjs/jwt';
-import { Injectable } from '@nestjs/common';
-import type { UserLogin, Token, RefreshToken } from '@en/common/user';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import type {
+  UserLogin,
+  Token,
+  RefreshToken,
+  UserUpdate,
+} from '@en/common/user';
 import { ResponseService, PrismaService } from '@libs/shared';
 import { UserCreateInput } from '@libs/shared/generated/prisma/models';
 import { AuthService } from '../auth/auth.service';
-import { userSelect } from './user.select';
+import { updateUserSelect, userSelect } from './user.select';
 import { UserRegisterDto } from './dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { MinioService } from '@libs/shared/minio/minio.service';
-
+import type { Request } from 'express';
 @Injectable()
 export class UserService {
   constructor(
@@ -137,10 +142,39 @@ export class UserService {
     const baseUrl = isHttps ? 'https' : 'http';
     const port = this.configService.get('MINIO_PORT')!;
     const databaseUrl = `/${bucket}/${fileName}`;
-    const previewUrl = `${baseUrl}://${this.configService.get('MINIO_HOST')}:${port}${databaseUrl}`;
+    const previewUrl = `${baseUrl}://${this.configService.get('MINIO_URL')}:${port}${databaseUrl}`;
     return this.responseService.success({
       previewUrl,
       databaseUrl,
     });
+  }
+
+  async updateUser(updateUserDto: UserUpdate, user: Request['user']) {
+    if (updateUserDto.email) {
+      const email = await this.prismaService.user.findUnique({
+        where: {
+          email: updateUserDto.email,
+        },
+      });
+      if (email) {
+        return this.responseService.error(null, '邮箱已存在');
+      }
+    }
+    const updateUser = await this.prismaService.user.update({
+      where: {
+        id: user.userId,
+      },
+      data: {
+        name: updateUserDto.name,
+        email: updateUserDto.email,
+        address: updateUserDto.address,
+        avatar: updateUserDto.avatar,
+        bio: updateUserDto.bio,
+        isTimingTask: updateUserDto.isTimingTask,
+        timingTaskTime: updateUserDto.timingTaskTime,
+      },
+      select: updateUserSelect,
+    });
+    return this.responseService.success(updateUser);
   }
 }

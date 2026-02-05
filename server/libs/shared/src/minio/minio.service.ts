@@ -26,7 +26,7 @@ export class MinioService implements OnModuleInit {
       await this.minioClient.setBucketPolicy(
         bucket,
         JSON.stringify({
-          Version: '2012-10-17',
+          Version: '2012-10-17', //策略语言版本版本 类似于http版本 例如http1.1 http2.0 这个值固定即可
           Statement: [
             {
               Sid: 'PublicReadObjects', //给这个规则起一个名字
