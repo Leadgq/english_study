@@ -7,7 +7,7 @@ export class WordBookController {
   constructor(private readonly wordBookService: WordBookService) {}
 
   @Get()
-  findAll(@Query() query) {
+  findAll(@Query() query: WordQuery) {
     return this.wordBookService.findAll(query);
   }
 }
