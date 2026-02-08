@@ -1,6 +1,8 @@
 <template>
     <div class="w-[1200px] mx-auto flex mt-10">
+        <!-- 左侧模型列表 -->
         <Conversations @onChangeActive="changeActive" />
+        <!-- 对话内容列表 -->
         <Bubble :list="list" :role="active" @sendMessage="sendMessage" />
     </div>
 </template>

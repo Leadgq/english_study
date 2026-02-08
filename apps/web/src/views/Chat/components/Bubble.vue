@@ -10,7 +10,7 @@
                         <el-avatar :size="35">user</el-avatar>
                     </div>
                 </div>
-                <div class="flex justify-start items-center gap-4 mt-5 mb-5" v-else>
+                <div class="flex justify-start gap-4 mt-5 mb-5" v-else>
                     <div> <el-avatar :size="35">AI</el-avatar></div>
                     <div v-if="item.role === 'ai' && item.content !== ''"
                         class="text-sm text-gray-700 max-w-[80%] bg-white rounded-lg p-2 shadow-md"
