@@ -11,8 +11,9 @@
 </template>
 
 <script setup lang="ts">
+import { getChatMode } from "@/apis/chat";
 import type { ChatModeList, ChatMode } from "@en/common/chat";
-import { ref } from "vue"
+import { onMounted, ref } from "vue"
 
 const active = ref<string | null>(null)
 
@@ -21,4 +22,15 @@ const chatMode = ref<ChatModeList>([])
 function changeActive(value: ChatMode) {
     active.value = value.id
 }
+
+async function getModelList() {
+    const res = await getChatMode()
+    if (res.success && res.message) {
+        chatMode.value = res.data
+    }
+}
+
+onMounted(() => {
+    getModelList()
+})
 </script>

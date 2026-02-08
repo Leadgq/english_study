@@ -84,7 +84,7 @@ serverApi.interceptors.response.use(
 
 // ai服务的拦截
 export const aiApi = axios.create({
-  baseURL: "/api/v1/ai",
+  baseURL: "/ai/v1",
   timeout: TIMEOUT,
 });
 
