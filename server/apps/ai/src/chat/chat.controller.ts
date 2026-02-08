@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Res, Query } from '@nestjs/common';
 import { ChatService } from './chat.service';
-import type { ChatDto } from '@en/common/chat';
+import type { ChatDto, ChatRoleType } from '@en/common/chat';
 import type { Response } from 'express';
 
 @Controller('chat')
@@ -23,7 +23,7 @@ export class ChatController {
   }
 
   @Get('history')
-  findAll() {
-    return this.chatService.findAll();
+  findAll(@Query('userId') userId: string, @Query('role') role: ChatRoleType) {
+    return this.chatService.findAll(userId, role);
   }
 }

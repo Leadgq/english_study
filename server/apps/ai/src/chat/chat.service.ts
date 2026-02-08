@@ -3,13 +3,15 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { createDeepSeek, createCheckpoint } from '../llm/llm.config';
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres';
 import type { ChatDto, ChatRoleType } from '@en/common/chat';
-import type { ReactAgent } from 'langchain';
+import type { AIMessageChunk, ReactAgent } from 'langchain';
 import { createAgent } from 'langchain';
-
+import { ResponseService } from '@libs/shared';
 @Injectable()
 export class ChatService implements OnModuleInit {
   private checkpointer: PostgresSaver;
   private agents: Map<ChatRoleType, ReactAgent> = new Map();
+  constructor(private readonly responseService: ResponseService) {}
+  
   async onModuleInit() {
     // 初始话
     this.checkpointer = await createCheckpoint();
@@ -32,9 +34,7 @@ export class ChatService implements OnModuleInit {
     const threadId = `${createChatDto.userId}-${createChatDto.role}`;
     const stream = agent.stream(
       {
-        messages: [
-          { role: "human", content: createChatDto.content },
-        ],
+        messages: [{ role: 'human', content: createChatDto.content }],
       },
       {
         configurable: {
@@ -43,10 +43,22 @@ export class ChatService implements OnModuleInit {
         streamMode: 'messages',
       },
     );
-    return stream; // 这是个迭代器
+    return stream; // 这是个迭代器，需要在controller中处理
   }
 
-  findAll() {
-    return `This action returns all chat`;
+  async findAll(userId: string, role: ChatRoleType) {
+    const threadId = `${userId}-${role}`;
+    const message = await this.checkpointer.get({
+      configurable: {
+        thread_id: threadId,
+      },
+    });
+    const messageList = message?.channel_values.messages as AIMessageChunk[];
+    return this.responseService.success({
+      data: messageList.map((item) => ({
+        role: item.type,
+        content: item.content,
+      })),
+    });
   }
 }

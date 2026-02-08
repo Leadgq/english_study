@@ -14,6 +14,10 @@
 import { getChatMode } from "@/apis/chat";
 import type { ChatModeList, ChatMode } from "@en/common/chat";
 import { onMounted, ref } from "vue"
+import { userStore } from "@/stores/user";
+import { getChatHistory } from "@/apis/chat";
+
+const userInstance = userStore();
 
 const active = ref<string | null>(null)
 
@@ -30,7 +34,15 @@ async function getModelList() {
     }
 }
 
+async function getMessageList() {
+    const res = await getChatHistory(userInstance.user?.id!, 'normal')
+    if (res.success && res.message) {
+        console.log(res.data)
+    }
+}
+
 onMounted(() => {
     getModelList()
+    getMessageList()
 })
 </script>
