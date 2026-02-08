@@ -15,6 +15,7 @@ import type { ChatRoleType } from "@en/common/chat";
 import { sse, CHAT_URL } from '@/apis/sse';
 const userInstance = userStore()
 
+const loading = ref(false)
 const active = ref<ChatRoleType>('normal')
 const list = ref<ChatMessageList>([])
 
@@ -27,6 +28,7 @@ async function changeActive(value: ChatMode) {
 }
 
 function sendMessage(message: string) {
+    loading.value = true
     list.value.push({
         role: "human",
         content: message,
@@ -44,6 +46,9 @@ function sendMessage(message: string) {
         if (last) {
             last.content += data.content
         }
+        loading.value = false
+    }, () => {
+        loading.value = false
     })
 }
 </script>
