@@ -30,6 +30,9 @@
 import { ref } from 'vue'
 import { Position } from '@element-plus/icons-vue'
 import type { ChatMessageList } from "@en/common/chat"
+import { fetchEventSource } from "@microsoft/fetch-event-source"
+import { userStore } from "@/stores/user";
+const userInstance = userStore();
 
 const props = defineProps<{
     list?: ChatMessageList
@@ -38,7 +41,18 @@ const props = defineProps<{
 const message = ref('')
 
 function sendMessage() {
-
+    fetchEventSource('/ai/v1/chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            userId: userInstance.user?.id,
+            content: message.value,
+            role: 'normal',
+        }),
+    })
+    message.value = ''
 }
 
 function parseMarkdown(content: string) {
