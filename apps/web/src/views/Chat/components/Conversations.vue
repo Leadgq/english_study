@@ -14,35 +14,31 @@
 import { getChatMode } from "@/apis/chat";
 import type { ChatModeList, ChatMode } from "@en/common/chat";
 import { onMounted, ref } from "vue"
-import { userStore } from "@/stores/user";
-import { getChatHistory } from "@/apis/chat";
 
-const userInstance = userStore();
-
+const emit = defineEmits<{
+    (e: 'onChangeActive', value: ChatMode): void
+}>()
 const active = ref<string | null>(null)
 
 const chatMode = ref<ChatModeList>([])
 
 function changeActive(value: ChatMode) {
     active.value = value.id
+    emit('onChangeActive', value)
 }
 
 async function getModelList() {
     const res = await getChatMode()
     if (res.success && res.message) {
         chatMode.value = res.data
-    }
-}
-
-async function getMessageList() {
-    const res = await getChatHistory(userInstance.user?.id!, 'normal')
-    if (res.success && res.message) {
-        console.log(res.data)
+        if (res.data.length > 0) {
+            active.value = res.data[0]!.id
+            emit('onChangeActive', res.data[0]!)
+        }
     }
 }
 
 onMounted(() => {
     getModelList()
-    getMessageList()
 })
 </script>

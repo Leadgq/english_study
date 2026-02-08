@@ -11,7 +11,7 @@ export class ChatService implements OnModuleInit {
   private checkpointer: PostgresSaver;
   private agents: Map<ChatRoleType, ReactAgent> = new Map();
   constructor(private readonly responseService: ResponseService) {}
-  
+
   async onModuleInit() {
     // 初始话
     this.checkpointer = await createCheckpoint();
@@ -47,18 +47,14 @@ export class ChatService implements OnModuleInit {
   }
 
   async findAll(userId: string, role: ChatRoleType) {
-    const threadId = `${userId}-${role}`;
-    const message = await this.checkpointer.get({
-      configurable: {
-        thread_id: threadId,
-      },
-    });
-    const messageList = message?.channel_values.messages as AIMessageChunk[];
-    return this.responseService.success({
-      data: messageList.map((item) => ({
-        role: item.type,
-        content: item.content,
-      })),
-    });
+     const messages = await this.checkpointer.get({
+      configurable: { thread_id: `${userId}-${role}` }
+    })
+    const list = messages?.channel_values?.messages as AIMessageChunk[]
+    if(!list) return this.responseService.success([]) //如果历史记录为空，则返回空数组
+    return this.responseService.success(list.map(item => ({
+      content: item.content,
+      role: item.type,
+    })))
   }
 }

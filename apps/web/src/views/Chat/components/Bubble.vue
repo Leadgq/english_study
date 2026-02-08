@@ -27,35 +27,43 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { nextTick, ref, useTemplateRef, watch } from 'vue'
 import { Position } from '@element-plus/icons-vue'
 import type { ChatMessageList } from "@en/common/chat"
-import { fetchEventSource } from "@microsoft/fetch-event-source"
-import { userStore } from "@/stores/user";
-const userInstance = userStore();
+import type { ChatRoleType } from "@en/common/chat";
+import { marked } from "marked"
+
+const emit = defineEmits<{
+    (e: 'sendMessage', value: string): void
+}>()
+
+const chatRef = useTemplateRef<HTMLDivElement>("chatRef")
 
 const props = defineProps<{
-    list?: ChatMessageList
+    list?: ChatMessageList,
+    role: ChatRoleType,
 }>()
 
 const message = ref('')
 
 function sendMessage() {
-    fetchEventSource('/ai/v1/chat', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            userId: userInstance.user?.id,
-            content: message.value,
-            role: 'normal',
-        }),
-    })
+    emit('sendMessage', message.value)
     message.value = ''
 }
 
 function parseMarkdown(content: string) {
-
+    if (!content) {
+        return ''
+    }
+    return marked.parse(content)
 }
+
+watch(() => props.list, () => {
+    nextTick(() => {
+        chatRef.value?.scrollIntoView({ behavior: 'smooth' })
+    })
+}, {
+    deep: true,
+    immediate: true,
+})
 </script>

@@ -8,5 +8,5 @@ export const getChatMode = () => {
 
 
 export const getChatHistory = (userId: string, role: ChatRoleType) => {
-  return aiApi.get(`/chat/history?userId=${userId}&role=${role}`) as Promise<Response<ChatMessageList[]>>;
+  return aiApi.get(`/chat/history?userId=${userId}&role=${role}`) as Promise<Response<ChatMessageList>>;
 }
