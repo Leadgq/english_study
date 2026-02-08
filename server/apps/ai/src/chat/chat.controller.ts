@@ -23,7 +23,7 @@ export class ChatController {
   }
 
   @Get('history')
-  findAll(@Query('userId') userId: string, @Query('role') role: ChatRoleType) {
-    return this.chatService.findAll(userId, role);
+  getHistory(@Query('userId') userId: string, @Query('role') role: ChatRoleType) {
+    return this.chatService.getHistory(userId, role);
   }
 }

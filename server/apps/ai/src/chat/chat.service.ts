@@ -46,12 +46,12 @@ export class ChatService implements OnModuleInit {
     return stream; // 这是个迭代器，需要在controller中处理
   }
 
-  async findAll(userId: string, role: ChatRoleType) {
+  async getHistory(userId: string, role: ChatRoleType) {
      const messages = await this.checkpointer.get({
       configurable: { thread_id: `${userId}-${role}` }
     })
     const list = messages?.channel_values?.messages as AIMessageChunk[]
-    if(!list) return this.responseService.success([]) //如果历史记录为空，则返回空数组
+    if(!list) return this.responseService.success([])
     return this.responseService.success(list.map(item => ({
       content: item.content,
       role: item.type,
