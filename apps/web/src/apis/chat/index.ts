@@ -1,9 +1,9 @@
 import { aiApi } from "@/apis";
-import type { ChatMessageList, ChatMode, ChatRoleType } from "@en/common/chat";
+import type { ChatMessageList, ChatModeList, ChatRoleType } from "@en/common/chat";
 import type { Response } from "@/apis";
 
 export const getChatMode = () => {
-  return aiApi.get("/prompt/list") as Promise<Response<ChatMode[]>>;
+  return aiApi.get("/prompt/list") as Promise<Response<ChatModeList>>;
 };
 
 
