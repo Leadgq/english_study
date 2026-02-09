@@ -1,4 +1,3 @@
-import { install } from "element-plus";
 import type { App } from "vue";
 
 export default {
