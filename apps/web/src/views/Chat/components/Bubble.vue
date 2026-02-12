@@ -12,9 +12,12 @@
                 </div>
                 <div class="flex justify-start gap-4 mt-5 mb-5" v-else>
                     <div> <el-avatar :size="35">AI</el-avatar></div>
-                    <div v-if="item.role === 'ai' && item.content !== ''"
-                        class="text-sm text-gray-700 max-w-[80%] bg-white rounded-lg p-2 shadow-md"
-                        v-html="parseMarkdown(item.content)" />
+                     <div v-if="item.role === 'ai' && item.reasoning" class="text-[12px] text-gray-500 max-w-[80%] p-2">
+                            {{ item.reasoning }}
+                        </div>
+                        <div v-if="item.role === 'ai' && item.content !== ''"
+                            class="text-sm text-gray-700 max-w-[80%] bg-white rounded-lg mt-2 deepseek-markdown"
+                            v-html="parseMarkdown(item.content)" />
                 </div>
             </div>
             <div ref="chatRef"></div>
@@ -54,6 +57,7 @@ import { Position } from '@element-plus/icons-vue'
 import type { ChatMessageList } from "@en/common/chat"
 import type { ChatRoleType } from "@en/common/chat";
 import { marked } from "marked"
+import '@/assets/css/makeDown.css'
 
 const emit = defineEmits<{
     (e: 'sendMessage', value: string, deepThink: boolean, webSearch: boolean): void
