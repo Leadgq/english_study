@@ -10,14 +10,16 @@
                         <el-avatar :size="35">user</el-avatar>
                     </div>
                 </div>
-                <div class="flex justify-start gap-4 mt-5 mb-5" v-else>
+                <div class="flex justify-start items-center gap-4 mt-5 mb-5" v-else>
                     <div> <el-avatar :size="35">AI</el-avatar></div>
-                     <div v-if="item.role === 'ai' && item.reasoning" class="text-[12px] text-gray-500 max-w-[80%] p-2">
+                    <div>
+                        <div v-if="item.role === 'ai' && item.reasoning" class="text-[12px] text-gray-500 max-w-[80%] p-2">
                             {{ item.reasoning }}
                         </div>
                         <div v-if="item.role === 'ai' && item.content !== ''"
                             class="text-sm text-gray-700 max-w-[80%] bg-white rounded-lg mt-2 deepseek-markdown"
                             v-html="parseMarkdown(item.content)" />
+                    </div>
                 </div>
             </div>
             <div ref="chatRef"></div>
@@ -74,6 +76,9 @@ const props = defineProps<{
 const message = ref('')
 
 function sendMessage() {
+    if (!message.value) {
+        return
+    }
     emit('sendMessage', message.value, deepThink.value, webSearch.value)
     message.value = ''
 }

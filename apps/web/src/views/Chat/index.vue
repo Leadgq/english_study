@@ -39,6 +39,7 @@ function sendMessage(message: string, deepThink: boolean, webSearch: boolean) {
     list.value.push({
         role: "ai",
         content: "",
+        reasoning:'',
         type: "chat",
     })
     sse<ChatMessage, ChatDto>(CHAT_URL, "POST", {
@@ -48,9 +49,11 @@ function sendMessage(message: string, deepThink: boolean, webSearch: boolean) {
         deepThink,
         webSearch,
     }, (data) => {
-        const last = list.value[list.value.length - 1]
-        if (last) {
-            last.content += data.content
+       if(data.type === 'reasoning'){
+            list.value[list.value.length - 1]!.reasoning += data.content
+        }
+        if(data.type === 'chat'){
+            list.value[list.value.length - 1]!.content += data.content
         }
         loading.value = false
     }, () => {
