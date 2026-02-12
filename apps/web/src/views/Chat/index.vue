@@ -29,20 +29,24 @@ async function changeActive(value: ChatMode) {
     }
 }
 
-function sendMessage(message: string) {
+function sendMessage(message: string, deepThink: boolean, webSearch: boolean) {
     loading.value = true
     list.value.push({
         role: "human",
         content: message,
+        type: "chat",
     })
     list.value.push({
         role: "ai",
         content: "",
+        type: "chat",
     })
     sse<ChatMessage, ChatDto>(CHAT_URL, "POST", {
         role: active.value,
         content: message,
         userId: userInstance.user!.id,
+        deepThink,
+        webSearch,
     }, (data) => {
         const last = list.value[list.value.length - 1]
         if (last) {
