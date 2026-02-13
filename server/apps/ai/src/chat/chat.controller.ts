@@ -1,12 +1,14 @@
-import { Controller, Get, Post, Body, Res, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Res, Query, UseGuards } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import type { ChatDto, ChatRoleType } from '@en/common/chat';
 import type { Response } from 'express';
+import { AuthGuard } from '@libs/shared/auth/auth.guard';
 
 @Controller('chat')
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
+  @UseGuards(AuthGuard)
   @Post()
   async create(@Body() createChatDto: ChatDto, @Res() res: Response) {
     res.setHeader('Content-Type', 'text/event-stream'); // 流式传输的MIME类型
@@ -30,7 +32,8 @@ export class ChatController {
     }
     res.end();
   }
-
+  
+  @UseGuards(AuthGuard)
   @Get('history')
   getHistory(
     @Query('userId') userId: string,
