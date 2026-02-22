@@ -10,7 +10,7 @@ export const serverApi = axios.create({
   timeout: TIMEOUT,
 });
 
-export const uploadUrl =  import.meta.env.DEV ? 'http://192.168.101.32:9000' : 'http://目前没有'
+export const uploadUrl =  import.meta.env.DEV ? 'http://192.168.1.6:9000' : 'http://目前没有'
 
 
 // 创建锁
@@ -90,6 +90,14 @@ export const aiApi = axios.create({
 
 aiApi.interceptors.response.use((config) => {
   return config.data;
+});
+
+aiApi.interceptors.request.use((config) => {
+  const user = userStore();
+  if (user.getAccessToken) {
+    config.headers.Authorization = `Bearer ${user.getAccessToken}`;
+  }
+  return config;
 });
 
 export interface Response<T = any> {
