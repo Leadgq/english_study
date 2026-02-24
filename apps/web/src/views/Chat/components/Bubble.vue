@@ -13,7 +13,8 @@
                 <div class="flex justify-start items-center gap-4 mt-5 mb-5" v-else>
                     <div> <el-avatar :size="35">AI</el-avatar></div>
                     <div>
-                        <div v-if="item.role === 'ai' && item.reasoning" class="text-[12px] text-gray-500 max-w-[80%] p-2">
+                        <div v-if="item.role === 'ai' && item.reasoning"
+                            class="text-[12px] text-gray-500 max-w-[80%] p-2">
                             {{ item.reasoning }}
                         </div>
                         <div v-if="item.role === 'ai' && item.content !== ''"
@@ -48,6 +49,9 @@
             <div class="flex">
                 <el-input @keyup.enter="sendMessage" type="textarea" :rows="2" v-model="message" placeholder="请输入内容" />
                 <el-button class="ml-2" :icon="Position" type="primary" @click="sendMessage"></el-button>
+                <el-button v-if="!isRecording" class="ml-2" :icon="Microphone" type="primary"
+                    @click="startRecord"></el-button>
+                <el-button v-else class="ml-2" :icon="VideoPause" type="primary" @click="stopRecord"></el-button>
             </div>
         </div>
     </div>
@@ -55,11 +59,21 @@
 
 <script setup lang="ts">
 import { nextTick, ref, useTemplateRef, watch } from 'vue'
-import { Position } from '@element-plus/icons-vue'
+import { Position, Microphone, VideoPause } from '@element-plus/icons-vue'
 import type { ChatMessageList } from "@en/common/chat"
 import type { ChatRoleType } from "@en/common/chat";
 import { marked } from "marked"
 import '@/assets/css/makeDown.css'
+import { useVoiceToText } from '@/hooks/useVoiceToText'
+
+const { isRecording, start, stop } = useVoiceToText({
+    lang: 'zh-CN',
+    continuous: true,
+    interimResults: true,
+    maxAlternatives: 1,
+})
+
+
 
 const emit = defineEmits<{
     (e: 'sendMessage', value: string, deepThink: boolean, webSearch: boolean): void
@@ -88,6 +102,19 @@ function parseMarkdown(content: string) {
         return ''
     }
     return marked.parse(content)
+}
+
+
+function startRecord() {
+    start((res) => {
+        message.value = res
+    })
+}
+
+
+function stopRecord() {
+    stop()
+    sendMessage()
 }
 
 watch(() => props.list, () => {
