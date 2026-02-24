@@ -10,8 +10,9 @@ export const serverApi = axios.create({
   timeout: TIMEOUT,
 });
 
-export const uploadUrl =  import.meta.env.DEV ? 'http://192.168.1.6:9000' : 'http://目前没有'
-
+export const uploadUrl = import.meta.env.DEV
+  ? "http://192.168.1.6:9000"
+  : "http://目前没有";
 
 // 创建锁
 let isRefreshing = false;
@@ -38,7 +39,7 @@ serverApi.interceptors.response.use(
       return Promise.reject(error);
     }
     if (error.response.status !== 401) {
-      ElMessage.error('服务异常');
+      ElMessage.error("服务异常");
       return Promise.reject(error);
     } else {
       const user = userStore();
@@ -88,9 +89,20 @@ export const aiApi = axios.create({
   timeout: TIMEOUT,
 });
 
-aiApi.interceptors.response.use((config) => {
-  return config.data;
-});
+aiApi.interceptors.response.use(
+  (config) => {
+    return config.data;
+  },
+  (error) => {
+    const user = userStore();
+    if (error.response.status === 401) {
+      ElMessage.error("token失效了，请重新登录");
+      user.loginOut();
+      router.replace("/");
+    }
+    return Promise.reject(error);
+  },
+);
 
 aiApi.interceptors.request.use((config) => {
   const user = userStore();
