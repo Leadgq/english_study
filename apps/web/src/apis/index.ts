@@ -96,6 +96,9 @@ aiApi.interceptors.request.use((config) => {
   const user = userStore();
   if (user.getAccessToken) {
     config.headers.Authorization = `Bearer ${user.getAccessToken}`;
+  } else {
+    user.loginOut();
+    router.replace("/");
   }
   return config;
 });
