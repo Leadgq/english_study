@@ -27,7 +27,7 @@
                             <span class="text-xs text-zinc-400 truncate">讲师 {{ item.teacher }}</span>
                             <span class="text-lg font-bold text-indigo-600 shrink-0">¥{{ item.price }}</span>
                         </div>
-                        <button type="button"
+                        <button type="button" @click="openPay(item)"
                             class="mt-4 w-full py-2.5 rounded-xl text-sm font-medium text-indigo-600 border border-indigo-200 bg-white hover:bg-indigo-50 transition-colors cursor-pointer">
                             购买课程
                         </button>
@@ -35,6 +35,7 @@
                 </article>
             </div>
         </div>
+        <CoursePay v-model="payVisible" :course="selectCourse"></CoursePay>
     </div>
 </template>
 
@@ -42,16 +43,27 @@
 import { onMounted, ref } from 'vue';
 import { getCourseList } from '@/apis/course';
 import { uploadUrl } from "@/apis"
-
+import type { Course } from "@en/common/course"
+import CoursePay from './components/pay.vue'
 import type { CourseList } from '@en/common/course';
 
+// 控制支付弹窗
+const payVisible = ref(false);
+
+const selectCourse = ref<Course | null>(null);
+
 const list = ref<CourseList>([])
+
+const openPay = (course: Course) => {
+    selectCourse.value = course;
+    payVisible.value = true;
+}
 
 const getList = async () => {
     const res = await getCourseList();
     if (res.success && res.data) {
         list.value = res.data;
-        console.log(list.value );
+        console.log(list.value);
     }
 }
 
