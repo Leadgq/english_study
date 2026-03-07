@@ -64,6 +64,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { Course } from "@en/common/course"
+import type { CreatePayDto } from "@en/common/pay"
 import { ElMessage } from 'element-plus';
 import { uploadUrl } from "@/apis"
 
@@ -87,7 +88,13 @@ const close = () => {
 };
 
 const onConfirm = () => {
-
+    const payDto: CreatePayDto = {
+        subject: props.course?.name || "",
+        body: props.course?.description || "",
+        total_amount: props.course?.price.toString() || "",
+        courseId: props.course?.id || "",
+    }
+    console.log(payDto);
 };
 
 const tips = () => {

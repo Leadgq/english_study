@@ -43,10 +43,12 @@
 import { onMounted, ref } from 'vue';
 import { getCourseList } from '@/apis/course';
 import { uploadUrl } from "@/apis"
+import { useLogin } from "@/hooks/useLogin"
 import type { Course } from "@en/common/course"
 import CoursePay from './components/pay.vue'
 import type { CourseList } from '@en/common/course';
 
+const { login } = useLogin();
 // 控制支付弹窗
 const payVisible = ref(false);
 
@@ -54,7 +56,8 @@ const selectCourse = ref<Course | null>(null);
 
 const list = ref<CourseList>([])
 
-const openPay = (course: Course) => {
+const openPay = async (course: Course) => {
+    await login();
     selectCourse.value = course;
     payVisible.value = true;
 }
@@ -63,7 +66,6 @@ const getList = async () => {
     const res = await getCourseList();
     if (res.success && res.data) {
         list.value = res.data;
-        console.log(list.value);
     }
 }
 

@@ -1,4 +1,4 @@
-export interface CreateOrderDto {
+export interface CreatePayDto {
     subject: string; //订单标题
     body: string; //附加信息 可以自定义内容
     total_amount: string; //订单金额
