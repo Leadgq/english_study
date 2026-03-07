@@ -4,13 +4,14 @@ import type { TokenPayload } from '@en/common/user';
 import * as nanoid from "nanoid";
 import dayjs from "dayjs";
 import { ConfigService } from '@nestjs/config';
-import { PrismaService, PayService as SharedPayService } from "@libs/shared"
+import { PrismaService, PayService as SharedPayService, ResponseService } from "@libs/shared"
 import type { Request } from "express"
 @Injectable()
 export class PayService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
+    private readonly responseService: ResponseService,
     private readonly sharedPayService: SharedPayService) {
   }
 
@@ -20,7 +21,7 @@ export class PayService {
   }
 
   async create(createPayDto: CreatePayDto, user: TokenPayload) {
-    await this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       // 1. create order
       const outTradeNo = this.createOutTradeNo();
       await tx.paymentRecord.create({
@@ -55,6 +56,7 @@ export class PayService {
         timeExpire: dateTime.toDate().getTime(),
       }
     })
+    this.responseService.success(result);
   }
 
   notify(req: Request) {
