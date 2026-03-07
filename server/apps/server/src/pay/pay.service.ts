@@ -34,13 +34,14 @@ export class PayService {
       })
       // 2. create sdk
       const alipaySdk = this.sharedPayService.getAlipaySdk();
+      const dateTime = dayjs().add(1, "minute");
       const payUrl = alipaySdk.pageExecute("alipay.trade.page.pay", "GET", {
         bizContent: {
           out_trade_no: outTradeNo,
           total_amount: createPayDto.total_amount,
           subject: createPayDto.subject,
           product_code: "FAST_INSTANT_TRADE_PAY",
-          time_expire: dayjs().add(1, "minute").format("YYYY-MM-DD HH:mm:ss"),
+          time_expire: dateTime.format("YYYY-MM-DD HH:mm:ss"),
           body: JSON.stringify({
             courseId: createPayDto.courseId,
             userId: user.userId,
@@ -49,7 +50,9 @@ export class PayService {
         },
       });
       return {
-        payUrl
+        payUrl,
+        // 时间戳
+        timeExpire: dateTime.toDate().getTime(),
       }
     })
   }
