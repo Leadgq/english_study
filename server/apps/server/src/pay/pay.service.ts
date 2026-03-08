@@ -56,10 +56,11 @@ export class PayService {
         timeExpire: dateTime.toDate().getTime(),
       }
     })
-    this.responseService.success(result);
+    return this.responseService.success(result);
   }
 
   notify(req: Request) {
+    console.log(req);
     return true;
   }
 }

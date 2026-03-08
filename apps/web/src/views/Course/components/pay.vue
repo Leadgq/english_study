@@ -64,7 +64,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { Course } from "@en/common/course"
-import type { CreatePayDto } from "@en/common/pay"
+import type { CreatePayDto, ResultPay } from "@en/common/pay"
+import { createPay } from "@/apis/pay"
 import { ElMessage } from 'element-plus';
 import { uploadUrl } from "@/apis"
 
@@ -85,16 +86,27 @@ const emit = defineEmits<{
 
 const close = () => {
     modelValue.value = false;
+    timeExpire.value = 0;
+    isPay.value = false;
 };
 
-const onConfirm = () => {
+const onConfirm = async () => {
     const payDto: CreatePayDto = {
         subject: props.course?.name || "",
         body: props.course?.description || "",
         total_amount: props.course?.price.toString() || "",
         courseId: props.course?.id || "",
     }
-    console.log(payDto);
+    const res = await createPay(payDto);
+    console.log(res);
+    if (res.code === 200) {
+        isPay.value = true;
+        timeExpire.value = res.data.timeExpire || 0;
+        window.open(res.data.payUrl, "_blank");
+    } else {
+        ElMessage.error(res.message);
+        isPay.value = false;
+    }
 };
 
 const tips = () => {

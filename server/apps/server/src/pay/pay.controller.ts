@@ -9,7 +9,7 @@ export class PayController {
   constructor(private readonly payService: PayService) { }
 
   @UseGuards(AuthGuard)
-  @Post()
+  @Post("create")
   create(@Body() createPayDto: CreatePayDto, @Req() req: Request) {
     return this.payService.create(createPayDto, req.user);
   }
