@@ -11,6 +11,7 @@ import {
 } from '@libs/shared';
 import type { Request } from 'express';
 import { TradeStatus } from '@libs/shared/generated/prisma/enums';
+import { SocketGateway } from '../socket/socket.gateway';
 
 @Injectable()
 export class PayService {
@@ -19,6 +20,7 @@ export class PayService {
     private readonly configService: ConfigService,
     private readonly responseService: ResponseService,
     private readonly sharedPayService: SharedPayService,
+    private readonly socketGateway: SocketGateway,
   ) {}
 
   private createOutTradeNo() {
@@ -103,6 +105,8 @@ export class PayService {
           paymentRecordId: paymentRecord.id,
         },
       });
+      // 发送支付成功事件
+      this.socketGateway.emitPaymentSuccess(userInfo.userId);
     });
     return true;
   }

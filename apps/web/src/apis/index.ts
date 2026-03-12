@@ -14,6 +14,11 @@ export const uploadUrl = import.meta.env.DEV
   ? "http://192.168.1.6:9000"
   : "http://目前没有";
 
+// socket-client 它是用http
+export const socketUrl = import.meta.env.DEV
+  ? "http://localhost:3000"
+  : "http://目前没有";
+ 
 // 创建锁
 let isRefreshing = false;
 // 创建失败的队列

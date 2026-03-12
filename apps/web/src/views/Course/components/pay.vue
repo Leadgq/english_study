@@ -62,12 +62,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import type { Course } from "@en/common/course"
-import type { CreatePayDto, ResultPay } from "@en/common/pay"
+import type { CreatePayDto } from "@en/common/pay"
 import { createPay } from "@/apis/pay"
 import { ElMessage } from 'element-plus';
 import { uploadUrl } from "@/apis"
+import { useSocket } from "@/hooks/useSocket";
+const { getConnect } = useSocket();
 
 // 支付状态
 const isPay = ref(false);
@@ -75,6 +77,23 @@ const isPay = ref(false);
 const timeExpire = ref(0);
 // 弹窗状态
 const modelValue = defineModel<boolean>("modelValue", { required: true })
+
+watch(modelValue, (newVal) => {
+    const socket = getConnect();
+    if (newVal) {
+        socket?.on("paymentSuccess", () => {
+            ElMessage.success({
+                message: "支付成功",
+                type: "success",
+                duration: 10000  //10s
+            });
+            close();
+        })
+    } else {
+        socket?.off("paymentSuccess");
+    }
+})
+
 
 const props = defineProps<{
     course?: Course | null;
@@ -98,7 +117,6 @@ const onConfirm = async () => {
         courseId: props.course?.id || "",
     }
     const res = await createPay(payDto);
-    console.log(res);
     if (res.code === 200) {
         isPay.value = true;
         timeExpire.value = res.data.timeExpire || 0;
