@@ -9,3 +9,9 @@ export const getCourseList = () => {
         Response<CourseList>
     >;
 }
+
+export const getMyCourseList = () => {
+    return serverApi.get(`/course/my`) as Promise<
+        Response<CourseList>
+    >;
+}

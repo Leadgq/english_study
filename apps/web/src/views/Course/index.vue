@@ -8,6 +8,10 @@
                 <p class="mt-3 text-zinc-500 text-sm max-w-md mx-auto">一次购买，长期有效 · 覆盖高考、考研、四六级、托福雅思等</p>
             </header>
 
+            <el-tabs v-model="currentTab" @tab-change="getList" type="card">
+                <el-tab-pane label="精选课程" name="list"></el-tab-pane>
+                <el-tab-pane label="我的课程" name="my" v-if="userInstance.user?.id"></el-tab-pane>
+            </el-tabs>
             <!-- 课程卡片 3 列 -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <article v-for="item in list" :key="item.id"
@@ -29,7 +33,7 @@
                         </div>
                         <button type="button" @click="openPay(item)"
                             class="mt-4 w-full py-2.5 rounded-xl text-sm font-medium text-indigo-600 border border-indigo-200 bg-white hover:bg-indigo-50 transition-colors cursor-pointer">
-                            购买课程
+                            {{ currentTab === 'list' ? '购买课程' : '去学习' }}
                         </button>
                     </div>
                 </article>
@@ -41,12 +45,18 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { getCourseList } from '@/apis/course';
+import { getCourseList, getMyCourseList } from '@/apis/course';
 import { uploadUrl } from "@/apis"
 import { useLogin } from "@/hooks/useLogin"
 import type { Course } from "@en/common/course"
 import CoursePay from './components/pay.vue'
 import type { CourseList } from '@en/common/course';
+import { ElTabs } from 'element-plus'
+import { userStore } from "@/stores/user"
+const userInstance = userStore();
+
+// 控制当前选中的tab
+const currentTab = ref('list');
 
 const { login } = useLogin();
 // 控制支付弹窗
@@ -63,8 +73,11 @@ const openPay = async (course: Course) => {
 }
 
 const getList = async () => {
-    const res = await getCourseList();
-    if (res.success && res.data) {
+    if (currentTab.value === 'list') {
+        const res = await getCourseList();
+        list.value = res.data;
+    } else if (currentTab.value === 'my') {
+        const res = await getMyCourseList();
         list.value = res.data;
     }
 }
