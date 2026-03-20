@@ -45,6 +45,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { getCourseList, getMyCourseList } from '@/apis/course';
 import { uploadUrl } from "@/apis"
 import { useLogin } from "@/hooks/useLogin"
@@ -54,6 +55,7 @@ import type { CourseList } from '@en/common/course';
 import { ElTabs } from 'element-plus'
 import { userStore } from "@/stores/user"
 const userInstance = userStore();
+const router = useRouter();
 
 // 控制当前选中的tab
 const currentTab = ref('list');
@@ -68,8 +70,14 @@ const list = ref<CourseList>([])
 
 const openPay = async (course: Course) => {
     await login();
-    selectCourse.value = course;
-    payVisible.value = true;
+    if (currentTab.value === 'my') {
+        router.push({
+            path: `/courses/learn/${course.id}/${course.name}`,
+        })
+    } else {
+        selectCourse.value = course;
+        payVisible.value = true;
+    }
 }
 
 const getList = async () => {
