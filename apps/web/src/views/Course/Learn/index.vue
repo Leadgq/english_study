@@ -172,10 +172,17 @@ function saveWordMaster() {
 
 async function getWorldListData() {
     const res = await getWorldList(courseId.value);
-    console.log(res)
+    if (res.data) {
+        list.value = (res.data || []).map(item => {
+            return {
+                ...item,
+                isPlaying: false
+            }
+        })
+    }
 }
 
-onMounted(()=>{
+onMounted(() => {
     getWorldListData();
 })
 </script>
