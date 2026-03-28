@@ -95,14 +95,21 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import type { WordWithIsPlaying } from "@/views/WordBook/type";
 import { useAudio } from "@/hooks/useAudio"
 import { useRoute } from "vue-router"
+import { getWorldList } from "@/apis/learn/index";
+
 const route = useRoute();
 const title = computed(() => {
-    return route.query.title as string;
+    return route.params.title as string || '';
 })
+
+const courseId = computed(() => {
+    return route.params.courseId as string || '';
+})
+
 interface WordItem {
     word: string;
     input: string;
@@ -162,4 +169,13 @@ function onKeyDown(index: number, event: KeyboardEvent) {
 function saveWordMaster() {
 
 }
+
+async function getWorldListData() {
+    const res = await getWorldList(courseId.value);
+    console.log(res)
+}
+
+onMounted(()=>{
+    getWorldListData();
+})
 </script>
