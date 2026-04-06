@@ -42,6 +42,13 @@ export const userStore = defineStore(
       };
     };
 
+    // 更新用户单词数量
+    const updateWordNumber = (newNumber: number) => {
+      if (user.value) {
+        user.value.wordNumber = newNumber;
+      }
+    };
+
     const updateUserInfo = (newInfo: UserUpdate) => {
       if (!user.value) {
         return;
@@ -64,7 +71,8 @@ export const userStore = defineStore(
       updateToken,
       loginOut,
       getUpdateUserInfo,
-      updateUserInfo
+      updateUserInfo,
+      updateWordNumber,
     };
   },
   {

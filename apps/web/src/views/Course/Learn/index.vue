@@ -95,12 +95,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch, useTemplateRef, nextTick } from 'vue';
 import type { WordWithIsPlaying } from "@/views/WordBook/type";
 import { useAudio } from "@/hooks/useAudio"
 import { useRoute } from "vue-router"
-import { getWorldList } from "@/apis/learn/index";
+import { getWorldList, saveWorldMaster } from "@/apis/learn/index";
+import { userStore } from "@/stores/user";
+import { ElMessage } from "element-plus";
 
+const { updateWordNumber } = userStore();
+
+const inputRefs = useTemplateRef<HTMLInputElement[]>('inputRefs');
 const route = useRoute();
 const title = computed(() => {
     return route.params.title as string || '';
@@ -134,6 +139,7 @@ const currentWord = computed<WordWithIsPlaying | undefined>(() => {
 })
 
 watch(currentWord, () => {
+    isWordBlurred.value = true;
     const current = currentWord.value?.word || "";
     wordList.value = Array.from(current).map(item => {
         return {
@@ -152,22 +158,75 @@ function pagePrev() {
 }
 
 function pageNext() {
+    const isExistError = wordList.value.some(item => item.isTrue === false);
+    if (isExistError) {
+        ElMessage.error("请先完成拼写");
+        return;
+    }
     currentIndex.value++;
 }
 
 
 function onInput(index: number) {
-
+    const current = wordList.value[index];
+    if (!current) {
+        return;
+    }
+    current.isTrue = current.word === current.input;
+    nextTick(() => {
+        const input = inputRefs.value as HTMLInputElement[];
+        if (index < input.length - 1) {
+            input[index + 1]?.focus();
+        }
+    })
 }
 
 function onKeyDown(index: number, event: KeyboardEvent) {
+    if (event.key === 'Backspace') {
+        event.preventDefault();
+        const current = wordList.value[index];
+        if (!current) {
+            return;
+        }
+        current.input = "";
+        current.isTrue = undefined;
+        nextTick(() => {
+            const input = inputRefs.value as HTMLInputElement[];
+            if (index > 0) {
+                input[index - 1]?.focus();
+            }
+        })
+    }
 
+    if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+        const current = wordList.value[index];
+        if (!current) {
+            return;
+        }
+        if (current.input && index < wordList.value.length - 1) {
+            wordList.value[index + 1]!.input = event.key;
+            wordList.value[index + 1]!.isTrue = wordList.value[index + 1]!.word === event.key;
+            nextTick(() => {
+                //聚焦
+                const input = inputRefs.value as HTMLInputElement[];
+                input[index + 1]?.focus();
+            })
+        }
+    }
 }
 
 
 
-function saveWordMaster() {
-
+async function saveWordMaster() {
+    try {
+        const ids = list.value.map(item => item.id);
+        const res = await saveWorldMaster(ids);
+        updateWordNumber(res.data.wordNumber);
+        currentIndex.value = 0;
+        getWorldListData();
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 async function getWorldListData() {
