@@ -1,0 +1,33 @@
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import * as nodemailer from 'nodemailer';
+@Injectable()
+export class EmailService implements OnModuleInit {
+    private transporter: nodemailer.Transporter | null = null;
+    constructor(private configService: ConfigService) { }
+    onModuleInit() {
+        this.transporter = nodemailer.createTransport({
+            host: this.configService.get('EMAIL_HOST'),
+            port: this.configService.get('EMAIL_PORT'),
+            secure: !!Number(this.configService.get('EMAIL_USE_SSL')),
+            auth: {
+                user: this.configService.get('EMAIL_USER'),
+                pass: this.configService.get('EMAIL_PASSWORD'),
+            },
+        });
+    }
+    async sendEmail(to: string, subject: string, text: string): Promise<boolean> {
+        try {
+            await this.transporter?.sendMail({
+                from: this.configService.get('EMAIL_FROM'),
+                to,
+                subject,
+                html: text,
+            })
+            return true;
+        } catch (error) {
+            console.error(error);
+            return false;
+        }
+    }
+}
