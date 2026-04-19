@@ -82,6 +82,7 @@ export class DigestService implements OnModuleInit {
                 id: true
             }
         });
+
         for (const user of users) {
             const agent = createAgent({
                 model: createDeepSeek(),

@@ -18,7 +18,7 @@ export class LearnService {
     await this.prisma.wordBookRecord.createMany({
       data: worldMaster,
     });
-    await this.prisma.user.update({
+    const updatedUser = await this.prisma.user.update({
       where: {
         id: userId,
       },
@@ -29,7 +29,7 @@ export class LearnService {
       },
     });
     return this.responseService.success({
-      wordNumber: worldIds.length,
+      wordNumber: updatedUser.wordNumber,
     });
   }
 
